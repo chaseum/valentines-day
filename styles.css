@@ -51,6 +51,17 @@ body {
   text-align: center;
 }
 
+.step-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  object-position: 50% 50%;
+  border-radius: 10px;
+  border: 2px solid #f6d7df;
+  margin: 6px 0 12px;
+  display: block;
+}
+
 .progress {
   margin-bottom: 14px;
 }
@@ -107,9 +118,10 @@ body {
 }
 
 .answers.final .no-btn.free {
-	width: 52%;
-	left: 0;
-	transform: none;
+  width: auto;
+  min-width: 120px;
+  left: 0;
+  transform: none;
 }
 
 .big-btn {
@@ -148,8 +160,8 @@ body {
   background: #e25572;
   box-shadow:
     6px 0 #e25572,
-    12px 0 #e25572,
     18px 0 #e25572,
+    24px 0 #e25572,
     0 6px #e25572,
     6px 6px #e25572,
     12px 6px #e25572,
@@ -164,19 +176,20 @@ body {
     12px 18px #e25572,
     18px 18px #e25572,
     12px 24px #e25572;
-  transform: translateX(6px) scale(1.6);
+  transform: scale(1.6);
+  transform-origin: center;
   animation: pulse 1.2s ease-in-out infinite;
 }
 
 @keyframes pulse {
   0% {
-    transform: translateX(6px) scale(1.4);
+    transform: scale(1.4);
   }
   50% {
-    transform: translateX(6px) scale(1.8);
+    transform: scale(1.8);
   }
   100% {
-    transform: translateX(6px) scale(1.4);
+    transform: scale(1.4);
   }
 }
 

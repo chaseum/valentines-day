@@ -2,24 +2,48 @@ const QUESTIONS = [
   {
     prompt: "What city did we first meet?",
     options: ["Houston", "Navasota", "Bryan"],
+    correctIndex: 1,
+    imageSrc: "assets/IMG_7447.JPG",
+    imageAlt: "Memory photo for question one",
+    imagePosition: "50% 35%",
+  },
+  {
+    prompt: "What day did we first start talking?",
+    options: ["May 28", "Sep 19", "July 9"],
+    correctIndex: 2,
   },
   {
     prompt: "How many hackathons have we done together?",
     options: ["Two", "One", "Zero"],
+    correctIndex: 0,
+    imageSrc: "assets/IMG_7448.JPG",
+    imageAlt: "Memory photo for question three",
+    imagePosition: "50% 58%",
   },
   {
     prompt: "What food are we planning on making soon?",
-    options: ["Biscoff Cheesecake", "Ocean Water", "Mai Shen Yun"],
+    options: ["Mai Shen Yun", "Ocean Water", "Biscoff Cheesecake"],
+    correctIndex: 2,
   },
 ];
 
-const FEEDBACKS = ["Correct!", "Oh... that's not...", "Yurppp", "Goooood answer", "Good job king!"];
+const FEEDBACKS = ["Correct!", "Yurppp", "Goooood answer", "Good job king!", "The bear gets one point!"];
+const WRONGFEEDBACKS = ["Oh... that's not...", "Yo how did you get this wrong", "Blake let's be serious come on...", "WRONG ANSWER NEPHEW!!"];
+const FEEDBACK_DELAY_MS = 1400;
+const NO_MOVE_COOLDOWN_MS = 700;
+const TOTAL_STEPS = QUESTIONS.length + 1;
+const FINAL_PROMPT_IMAGE = {
+  src: "assets/IMG_0667.JPEG",
+  alt: "Photo for the Valentine question",
+  position: "50% 30%",
+};
 
 const progress = document.getElementById("progress");
 const progressLabel = document.getElementById("progress-label");
 const progressFill = document.getElementById("progress-fill");
 const cardTitle = document.getElementById("card-title");
 const cardSubtitle = document.getElementById("card-subtitle");
+const stepImage = document.getElementById("step-image");
 const questionText = document.getElementById("question-text");
 const answers = document.getElementById("answers");
 const startBtn = document.getElementById("start-btn");
@@ -29,6 +53,11 @@ const success = document.getElementById("success");
 
 let currentStep = 0;
 let isLocked = false;
+let noButtonReadyAt = 0;
+let noButtonCooldownTimer = null;
+let remainingCorrectFeedbacks = [];
+let remainingWrongFeedbacks = [];
+let lastShownFeedback = "";
 
 function setVisible(el, visible) {
   el.classList.toggle("hidden", !visible);
@@ -40,8 +69,8 @@ function setProgress(step) {
     return;
   }
   setVisible(progress, true);
-  progressLabel.textContent = `Step ${step} of 4`;
-  progressFill.style.width = `${(step / 4) * 100}%`;
+  progressLabel.textContent = `Step ${step} of ${TOTAL_STEPS}`;
+  progressFill.style.width = `${(step / TOTAL_STEPS) * 100}%`;
 }
 
 function clearAnswers() {
@@ -50,15 +79,55 @@ function clearAnswers() {
   answers.removeAttribute("style");
 }
 
-function showFeedback() {
-  const text = FEEDBACKS[Math.floor(Math.random() * FEEDBACKS.length)];
+function shuffled(list) {
+  const copy = [...list];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function refillFeedbackPool(pool) {
+  const next = shuffled(pool);
+  if (next.length > 1 && next[next.length - 1] === lastShownFeedback) {
+    [next[0], next[next.length - 1]] = [next[next.length - 1], next[0]];
+  }
+  return next;
+}
+
+function showFeedback(isCorrect) {
+  if (isCorrect && remainingCorrectFeedbacks.length === 0) {
+    remainingCorrectFeedbacks = refillFeedbackPool(FEEDBACKS);
+  }
+  if (!isCorrect && remainingWrongFeedbacks.length === 0) {
+    remainingWrongFeedbacks = refillFeedbackPool(WRONGFEEDBACKS);
+  }
+  const bucket = isCorrect ? remainingCorrectFeedbacks : remainingWrongFeedbacks;
+  const text = bucket.pop();
+  lastShownFeedback = text;
   feedback.textContent = text;
+}
+
+function setStepImage(src, alt, position) {
+  if (!src) {
+    stepImage.removeAttribute("src");
+    stepImage.alt = "";
+    stepImage.style.objectPosition = "";
+    setVisible(stepImage, false);
+    return;
+  }
+  stepImage.src = src;
+  stepImage.alt = alt || "";
+  stepImage.style.objectPosition = position || "50% 50%";
+  setVisible(stepImage, true);
 }
 
 function renderTitleStep() {
   setProgress(0);
-  cardTitle.textContent = "How well do you remember us?";
-  cardSubtitle.textContent = "Three quick questions (and one big one)!";
+  cardTitle.textContent = "Hello Bear (Blake), How well do you remember us?";
+  cardSubtitle.textContent = "Four quick questions (and one big one)!";
+  setStepImage();
   questionText.textContent = "";
   clearAnswers();
   setVisible(startBtn, true);
@@ -73,6 +142,7 @@ function renderQuestionStep(stepIndex) {
   const data = QUESTIONS[stepIndex - 1];
   cardTitle.textContent = `Question ${stepIndex}`;
   cardSubtitle.textContent = "";
+  setStepImage(data.imageSrc, data.imageAlt, data.imagePosition);
   questionText.textContent = data.prompt;
   clearAnswers();
   setVisible(startBtn, false);
@@ -80,7 +150,7 @@ function renderQuestionStep(stepIndex) {
   setVisible(content, true);
   feedback.textContent = "";
 
-  data.options.forEach((option) => {
+  data.options.forEach((option, optionIndex) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "nes-btn";
@@ -90,12 +160,13 @@ function renderQuestionStep(stepIndex) {
       if (isLocked) return;
       isLocked = true;
       [...answers.querySelectorAll("button")].forEach((b) => (b.disabled = true));
-      showFeedback();
+      const isCorrect = optionIndex === data.correctIndex;
+      showFeedback(isCorrect);
       setTimeout(() => {
         isLocked = false;
         currentStep += 1;
         renderStep();
-      }, 600);
+      }, FEEDBACK_DELAY_MS);
     });
     answers.appendChild(btn);
   });
@@ -104,30 +175,50 @@ function renderQuestionStep(stepIndex) {
 let lastNoPos = null;
 
 function moveNoButton(noBtn) {
-  const padding = 8;
-
+  const offscreenMargin = 20;
   noBtn.classList.add("free");
+  noBtn.style.position = "fixed";
 
-  const maxLeft = Math.max(0, answers.clientWidth - noBtn.offsetWidth - padding);
-  const maxTop = Math.max(0, answers.clientHeight - noBtn.offsetHeight - padding);
+  const minLeft = -offscreenMargin;
+  const maxLeft = window.innerWidth - noBtn.offsetWidth + offscreenMargin;
+  const minTop = -offscreenMargin;
+  const maxTop = window.innerHeight - noBtn.offsetHeight + offscreenMargin;
 
-  const minDistance = 90;
-  let left, top, tries = 0;
+  const minDistance = 120;
+  let left;
+  let top;
+  let tries = 0;
 
   do {
-	left = padding + Math.random() * maxLeft;
-	top = padding + Math.random() * maxTop;
-	tries += 1;
-  } while ( lastnoPos && Math.hypot(left - lastnoPos.left, top - lastNoPos.top) < minDist && tries < 25);
-  lastNoPos = {left, top};
-  noBtn.style.left = '${left}px';
-  noBtn.style.top = '${top}px';
+    left = minLeft + Math.random() * (maxLeft - minLeft);
+    top = minTop + Math.random() * (maxTop - minTop);
+    tries += 1;
+  } while (
+    lastNoPos &&
+    Math.hypot(left - lastNoPos.left, top - lastNoPos.top) < minDistance &&
+    tries < 25
+  );
+
+  lastNoPos = { left, top };
+  noBtn.style.left = `${left}px`;
+  noBtn.style.top = `${top}px`;
+}
+
+function tryMoveNoButton(noBtn) {
+  if (Date.now() < noButtonReadyAt) return;
+  if (noBtn.disabled) return;
+  moveNoButton(noBtn);
 }
 
 function renderFinalStep() {
-  setProgress(4);
-  cardTitle.textContent = "Will you be my Valentine?";
+  setProgress(TOTAL_STEPS);
+  cardTitle.textContent = "Will you be my Valentine (please)?";
   cardSubtitle.textContent = "";
+  setStepImage(
+    FINAL_PROMPT_IMAGE.src,
+    FINAL_PROMPT_IMAGE.alt,
+    FINAL_PROMPT_IMAGE.position
+  );
   questionText.textContent = "";
   clearAnswers();
   setVisible(startBtn, false);
@@ -154,7 +245,16 @@ function renderFinalStep() {
   noBtn.textContent = "No";
   noBtn.style.top = "84px";
   noBtn.setAttribute("aria-label", "No");
-  noBtn.addEventListener("click", () => moveNoButton(noBtn));
+  noBtn.disabled = true;
+  noButtonReadyAt = Date.now() + NO_MOVE_COOLDOWN_MS;
+  clearTimeout(noButtonCooldownTimer);
+  noButtonCooldownTimer = setTimeout(() => {
+    if (!document.body.contains(noBtn)) return;
+    noBtn.disabled = false;
+  }, NO_MOVE_COOLDOWN_MS);
+  noBtn.addEventListener("mouseenter", () => tryMoveNoButton(noBtn));
+  noBtn.addEventListener("click", () => tryMoveNoButton(noBtn));
+  noBtn.addEventListener("touchstart", () => tryMoveNoButton(noBtn), { passive: true });
 
   answers.appendChild(yesBtn);
   answers.appendChild(noBtn);
@@ -165,7 +265,7 @@ function renderStep() {
     renderTitleStep();
     return;
   }
-  if (currentStep >= 1 && currentStep <= 3) {
+  if (currentStep >= 1 && currentStep <= QUESTIONS.length) {
     renderQuestionStep(currentStep);
     return;
   }
