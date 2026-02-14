@@ -1,0 +1,195 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #f9d9e2;
+  font-family: "Press Start 2P", cursive;
+  color: #3b2f2f;
+}
+
+#app {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  padding: 24px;
+}
+
+.card-title {
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 6px 0 10px;
+  text-align: center;
+}
+
+.card-subtitle {
+  font-size: 10px;
+  line-height: 1.6;
+  margin: 0 0 16px;
+  text-align: center;
+  color: #6a4b4b;
+}
+
+.question-text {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 10px 0 16px;
+  text-align: center;
+}
+
+.progress {
+  margin-bottom: 14px;
+}
+
+.progress-label {
+  font-size: 10px;
+  margin-bottom: 6px;
+  color: #7d4c57;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #f1b3c4;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #e25572;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.answers {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 10px 0 16px;
+}
+
+.answers .nes-btn {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 10px;
+}
+
+.answers.final {
+  position: relative;
+  min-height: 260px;
+}
+
+.answers.final .nes-btn {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 82%;
+}
+
+.answers.final .nes-btn.free {
+  transform: none;
+}
+
+.answers.final .no-btn.free {
+	width: 52%;
+	left: 0;
+	transform: none;
+}
+
+.big-btn {
+  font-size: 12px;
+  padding: 14px 16px;
+}
+
+#start-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 14px;
+  font-size: 10px;
+}
+
+.feedback {
+  min-height: 18px;
+  margin-top: 10px;
+  text-align: center;
+  font-size: 10px;
+  color: #b0495c;
+}
+
+.hidden {
+  display: none;
+}
+
+.success {
+  text-align: center;
+  padding: 10px 0 6px;
+}
+
+.pixel-heart {
+  width: 6px;
+  height: 6px;
+  margin: 12px auto 0;
+  background: #e25572;
+  box-shadow:
+    6px 0 #e25572,
+    12px 0 #e25572,
+    18px 0 #e25572,
+    0 6px #e25572,
+    6px 6px #e25572,
+    12px 6px #e25572,
+    18px 6px #e25572,
+    24px 6px #e25572,
+    0 12px #e25572,
+    6px 12px #e25572,
+    12px 12px #e25572,
+    18px 12px #e25572,
+    24px 12px #e25572,
+    6px 18px #e25572,
+    12px 18px #e25572,
+    18px 18px #e25572,
+    12px 24px #e25572;
+  transform: translateX(6px) scale(1.6);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateX(6px) scale(1.4);
+  }
+  50% {
+    transform: translateX(6px) scale(1.8);
+  }
+  100% {
+    transform: translateX(6px) scale(1.4);
+  }
+}
+
+@media (max-width: 420px) {
+  #card {
+    padding: 18px;
+  }
+
+  .card-title {
+    font-size: 14px;
+  }
+
+  .answers .nes-btn {
+    font-size: 9px;
+  }
+}

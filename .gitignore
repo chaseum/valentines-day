@@ -1,0 +1,24 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+
+# Envs
+.env
+.env.*
+
+# Dependencies / builds
+node_modules/
+dist/
+build/
+.cache/
+
+# Local vendor checkout
+NES.css-develop/
