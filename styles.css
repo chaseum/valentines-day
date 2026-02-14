@@ -14,13 +14,24 @@ body {
   color: #3b2f2f;
 }
 
+#pet-fall-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
 #app {
+  position: relative;
   width: 100%;
   display: flex;
   justify-content: center;
+  z-index: 2;
 }
 
 #card {
+  position: relative;
   width: 100%;
   max-width: 420px;
   background: #ffffff;
@@ -29,11 +40,60 @@ body {
   padding: 24px;
 }
 
+.pet-fall {
+  position: absolute;
+  top: -80px;
+  animation-name: petFall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.15));
+}
+
 .card-title {
   font-size: 16px;
   line-height: 1.5;
   margin: 6px 0 10px;
   text-align: center;
+}
+
+.pet-splash {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.pet-splash-item {
+  position: absolute;
+  width: 120px;
+  display: block;
+  border: 3px solid #ffd5ea;
+  border-radius: 8px;
+  box-shadow:
+    0 0 0 3px #db4ea0,
+    0 10px 16px rgba(0, 0, 0, 0.2);
+}
+
+.pet-splash-cat {
+  left: -54px;
+  bottom: -54px;
+  transform: rotate(-12deg);
+  animation: splashPulseCat 1.2s ease-in-out infinite;
+}
+
+.pet-splash-dog {
+  top: -56px;
+  right: -54px;
+  transform: rotate(12deg);
+  animation: splashPulseDog 1.2s ease-in-out infinite;
+}
+
+.card-title.typewriter::after {
+  content: "|";
+  display: inline-block;
+  margin-left: 2px;
+  color: #c83f5f;
+  animation: typeCaretBlink 0.8s steps(1, end) infinite;
 }
 
 .final-dynamic-title {
@@ -264,8 +324,15 @@ body {
   min-height: 18px;
   margin-top: 10px;
   text-align: center;
-  font-size: 10px;
+  font-size: 12px;
   color: #b0495c;
+}
+
+.feedback.typewriter::after {
+  content: "_";
+  display: inline-block;
+  margin-left: 1px;
+  animation: typeCaretBlink 0.8s steps(1, end) infinite;
 }
 
 .hidden {
@@ -322,6 +389,41 @@ body {
   }
 }
 
+@keyframes typeCaretBlink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes splashPulseCat {
+  0% {
+    transform: rotate(-12deg) scale(0.96);
+  }
+  50% {
+    transform: rotate(-12deg) scale(1.04);
+  }
+  100% {
+    transform: rotate(-12deg) scale(0.96);
+  }
+}
+
+@keyframes splashPulseDog {
+  0% {
+    transform: rotate(12deg) scale(0.96);
+  }
+  50% {
+    transform: rotate(12deg) scale(1.04);
+  }
+  100% {
+    transform: rotate(12deg) scale(0.96);
+  }
+}
+
 @keyframes titleFloat {
   0% {
     transform: translateY(0);
@@ -364,9 +466,39 @@ body {
   }
 }
 
+@keyframes petFall {
+  0% {
+    transform: translate3d(0, -80px, 0) rotate(-6deg);
+  }
+  50% {
+    transform: translate3d(18px, 52vh, 0) rotate(8deg);
+  }
+  100% {
+    transform: translate3d(-14px, 110vh, 0) rotate(-10deg);
+  }
+}
+
 @media (max-width: 420px) {
   #card {
     padding: 18px;
+  }
+
+  .pet-splash {
+    inset: 0;
+  }
+
+  .pet-splash-item {
+    width: 96px;
+  }
+
+  .pet-splash-cat {
+    left: -34px;
+    bottom: -40px;
+  }
+
+  .pet-splash-dog {
+    top: -40px;
+    right: -36px;
   }
 
   .card-title {
