@@ -32,6 +32,12 @@ const WRONGFEEDBACKS = ["Oh... that's not...", "Yo how did you get this wrong", 
 const FEEDBACK_DELAY_MS = 2100;
 const NO_MOVE_COOLDOWN_MS = 700;
 const PROMPT_HIGHLIGHTS = ["city", "day", "hackathons", "food"];
+const SOUND_VOLUME = {
+  background: 0.2,
+  select: 0.5,
+  tryAgain: 0.24,
+  valentine: 0.01,
+};
 const TOTAL_STEPS = QUESTIONS.length + 1;
 const PASSING_SCORE_RATIO = 0.5;
 const DEFAULT_SUCCESS_TEXT = "Yay! Happy Valentine's Day My Fav Bear Ever <3 ";
@@ -66,6 +72,48 @@ let remainingCorrectFeedbacks = [];
 let remainingWrongFeedbacks = [];
 let lastShownFeedback = "";
 let correctAnswers = 0;
+let backgroundStarted = false;
+
+const selectSound = new Audio("sounds/select.mp3");
+selectSound.volume = SOUND_VOLUME.select;
+
+const tryAgainSound = new Audio("sounds/tryagain.mp3");
+tryAgainSound.volume = SOUND_VOLUME.tryAgain;
+
+const valentineSound = new Audio("sounds/valentine.mp3");
+valentineSound.volume = SOUND_VOLUME.valentine;
+
+const backgroundMusic = new Audio("sounds/background.mp3");
+backgroundMusic.loop = true;
+backgroundMusic.volume = SOUND_VOLUME.background;
+
+function tryPlayAudio(audio, restart = false) {
+  try {
+    if (restart) audio.currentTime = 0;
+    const maybePromise = audio.play();
+    if (maybePromise && typeof maybePromise.catch === "function") {
+      maybePromise.catch(() => {});
+    }
+  } catch {
+    // Keep quiz interaction responsive if audio cannot play.
+  }
+}
+
+function ensureBackgroundMusic() {
+  if (!backgroundStarted) {
+    backgroundStarted = true;
+    tryPlayAudio(backgroundMusic, false);
+    return;
+  }
+  if (backgroundMusic.paused) {
+    tryPlayAudio(backgroundMusic, false);
+  }
+}
+
+function onAnyButtonClick() {
+  ensureBackgroundMusic();
+  tryPlayAudio(selectSound, true);
+}
 
 function setPlainCardTitle(text) {
   cardTitle.classList.remove("final-dynamic-title");
@@ -206,6 +254,7 @@ function renderQuestionStep(stepIndex) {
     btn.setAttribute("aria-label", option);
     btn.addEventListener("click", () => {
       if (isLocked) return;
+      onAnyButtonClick();
       isLocked = true;
       [...answers.querySelectorAll("button")].forEach((b) => (b.disabled = true));
       const isCorrect = optionIndex === data.correctIndex;
@@ -260,6 +309,8 @@ function tryMoveNoButton(noBtn) {
 }
 
 function renderFinalStep() {
+  tryAgainSound.pause();
+  tryAgainSound.currentTime = 0;
   setProgress(TOTAL_STEPS);
   setDynamicFinalTitle();
   cardSubtitle.textContent = "";
@@ -283,6 +334,12 @@ function renderFinalStep() {
   yesBtn.style.top = "0px";
   yesBtn.setAttribute("aria-label", "Yes");
   yesBtn.addEventListener("click", () => {
+    onAnyButtonClick();
+    tryAgainSound.pause();
+    tryAgainSound.currentTime = 0;
+    backgroundMusic.pause();
+    backgroundMusic.currentTime = 0;
+    tryPlayAudio(valentineSound, true);
     successText.textContent = DEFAULT_SUCCESS_TEXT;
     setVisible(restartBtn, false);
     setVisible(successHeart, true);
@@ -305,7 +362,10 @@ function renderFinalStep() {
     noBtn.disabled = false;
   }, NO_MOVE_COOLDOWN_MS);
   noBtn.addEventListener("mouseenter", () => tryMoveNoButton(noBtn));
-  noBtn.addEventListener("click", () => tryMoveNoButton(noBtn));
+  noBtn.addEventListener("click", () => {
+    onAnyButtonClick();
+    tryMoveNoButton(noBtn);
+  });
   noBtn.addEventListener("touchstart", () => tryMoveNoButton(noBtn), { passive: true });
 
   answers.appendChild(yesBtn);
@@ -329,8 +389,14 @@ function renderRetryStep() {
   retryBtn.className = "nes-btn is-primary";
   retryBtn.textContent = "Restart Quiz";
   retryBtn.setAttribute("aria-label", "Restart quiz");
-  retryBtn.addEventListener("click", () => resetQuiz());
+  retryBtn.addEventListener("click", () => {
+    onAnyButtonClick();
+    resetQuiz();
+  });
   answers.appendChild(retryBtn);
+  valentineSound.pause();
+  valentineSound.currentTime = 0;
+  tryPlayAudio(tryAgainSound, true);
 }
 
 function renderStep() {
@@ -360,16 +426,22 @@ function resetQuiz() {
   remainingCorrectFeedbacks = [];
   remainingWrongFeedbacks = [];
   lastShownFeedback = "";
+  tryAgainSound.pause();
+  tryAgainSound.currentTime = 0;
+  valentineSound.pause();
+  valentineSound.currentTime = 0;
   renderStep();
 }
 
 startBtn.addEventListener("click", () => {
+  onAnyButtonClick();
   correctAnswers = 0;
   currentStep = 1;
   renderStep();
 });
 
 restartBtn.addEventListener("click", () => {
+  onAnyButtonClick();
   resetQuiz();
 });
 
