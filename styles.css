@@ -75,15 +75,15 @@ body {
 }
 
 .pet-splash-cat {
-  left: -54px;
-  bottom: -54px;
+  left: -74px;
+  bottom: -72px;
   transform: rotate(-12deg);
   animation: splashPulseCat 1.2s ease-in-out infinite;
 }
 
 .pet-splash-dog {
-  top: -56px;
-  right: -54px;
+  top: -78px;
+  right: -72px;
   transform: rotate(12deg);
   animation: splashPulseDog 1.2s ease-in-out infinite;
 }
@@ -350,9 +350,13 @@ body {
 }
 
 .pixel-heart {
+  position: absolute;
+  top: -18px;
+  right: 10px;
+  z-index: 5;
   width: 6px;
   height: 6px;
-  margin: 12px auto 0;
+  margin: 0;
   background: #e25572;
   box-shadow:
     6px 0 #e25572,
@@ -372,7 +376,7 @@ body {
     12px 18px #e25572,
     18px 18px #e25572,
     12px 24px #e25572;
-  transform: scale(1.6);
+  transform: scale(1.4);
   transform-origin: center;
   animation: pulse 1.2s ease-in-out infinite;
 }
@@ -492,13 +496,13 @@ body {
   }
 
   .pet-splash-cat {
-    left: -34px;
-    bottom: -40px;
+    left: -48px;
+    bottom: -52px;
   }
 
   .pet-splash-dog {
-    top: -40px;
-    right: -36px;
+    top: -56px;
+    right: -48px;
   }
 
   .card-title {
