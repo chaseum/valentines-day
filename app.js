@@ -13,7 +13,7 @@ const QUESTIONS = [
     correctIndex: 2,
   },
   {
-    prompt: "How many hackathons have we done together?",
+    prompt: "How many hackathons have we competed in together?",
     options: ["Two", "One", "Zero"],
     correctIndex: 0,
     imageSrc: "assets/IMG_7448.JPG",
@@ -29,9 +29,13 @@ const QUESTIONS = [
 
 const FEEDBACKS = ["Correct!", "Yurppp", "Goooood answer", "Good job king!", "The bear gets one point!"];
 const WRONGFEEDBACKS = ["Oh... that's not...", "Yo how did you get this wrong", "Blake let's be serious come on...", "WRONG ANSWER NEPHEW!!"];
-const FEEDBACK_DELAY_MS = 1400;
+const FEEDBACK_DELAY_MS = 2100;
 const NO_MOVE_COOLDOWN_MS = 700;
+const PROMPT_HIGHLIGHTS = ["city", "day", "hackathons", "food"];
 const TOTAL_STEPS = QUESTIONS.length + 1;
+const PASSING_SCORE_RATIO = 0.5;
+const DEFAULT_SUCCESS_TEXT = "Yay! Happy Valentine's Day My Fav Bear Ever <3 ";
+const RETRY_TEXT = "Lets try that again... You can do better king";
 const FINAL_PROMPT_IMAGE = {
   src: "assets/IMG_0667.JPEG",
   alt: "Photo for the Valentine question",
@@ -50,6 +54,9 @@ const startBtn = document.getElementById("start-btn");
 const feedback = document.getElementById("feedback");
 const content = document.getElementById("content");
 const success = document.getElementById("success");
+const successText = document.getElementById("success-text");
+const successHeart = document.querySelector(".pixel-heart");
+const restartBtn = document.getElementById("restart-btn");
 
 let currentStep = 0;
 let isLocked = false;
@@ -58,6 +65,43 @@ let noButtonCooldownTimer = null;
 let remainingCorrectFeedbacks = [];
 let remainingWrongFeedbacks = [];
 let lastShownFeedback = "";
+let correctAnswers = 0;
+
+function setPlainCardTitle(text) {
+  cardTitle.classList.remove("final-dynamic-title");
+  cardTitle.textContent = text;
+}
+
+function setIntroCardTitle() {
+  cardTitle.classList.remove("final-dynamic-title");
+  cardTitle.innerHTML = [
+    "Hi Blake, How well do",
+    '<span class="intro-you">you</span>',
+    "remember",
+    '<span class="intro-us">us</span>?',
+  ].join(" ");
+}
+
+function setDynamicFinalTitle() {
+  cardTitle.classList.add("final-dynamic-title");
+  cardTitle.innerHTML = [
+    '<span class="title-word">Will</span>',
+    '<span class="title-word title-soft">you</span>',
+    '<span class="title-word">be</span>',
+    '<span class="title-word">my</span>',
+    '<span class="title-word title-strong">Valentine</span>',
+    '<span class="title-word title-heart">?</span>',
+  ].join(" ");
+}
+
+function styleQuestionPrompt(prompt) {
+  let styled = prompt;
+  PROMPT_HIGHLIGHTS.forEach((word) => {
+    const regex = new RegExp(`\\b(${word})\\b`, "gi");
+    styled = styled.replace(regex, '<span class="prompt-highlight">$1</span>');
+  });
+  return styled;
+}
 
 function setVisible(el, visible) {
   el.classList.toggle("hidden", !visible);
@@ -125,14 +169,18 @@ function setStepImage(src, alt, position) {
 
 function renderTitleStep() {
   setProgress(0);
-  cardTitle.textContent = "Hello Bear (Blake), How well do you remember us?";
-  cardSubtitle.textContent = "Four quick questions (and one big one)!";
+  setIntroCardTitle();
+  cardSubtitle.innerHTML =
+    'Four quick questions (and one big one)!<br><span class="subtitle-highlight">You can only answer once</span>, so think hard...';
   setStepImage();
   questionText.textContent = "";
   clearAnswers();
   setVisible(startBtn, true);
   setVisible(success, false);
   setVisible(content, true);
+  setVisible(restartBtn, false);
+  setVisible(successHeart, true);
+  successText.textContent = DEFAULT_SUCCESS_TEXT;
   feedback.textContent = "";
   startBtn.focus();
 }
@@ -140,10 +188,10 @@ function renderTitleStep() {
 function renderQuestionStep(stepIndex) {
   setProgress(stepIndex);
   const data = QUESTIONS[stepIndex - 1];
-  cardTitle.textContent = `Question ${stepIndex}`;
+  setPlainCardTitle(`Question ${stepIndex}`);
   cardSubtitle.textContent = "";
   setStepImage(data.imageSrc, data.imageAlt, data.imagePosition);
-  questionText.textContent = data.prompt;
+  questionText.innerHTML = styleQuestionPrompt(data.prompt);
   clearAnswers();
   setVisible(startBtn, false);
   setVisible(success, false);
@@ -161,6 +209,7 @@ function renderQuestionStep(stepIndex) {
       isLocked = true;
       [...answers.querySelectorAll("button")].forEach((b) => (b.disabled = true));
       const isCorrect = optionIndex === data.correctIndex;
+      if (isCorrect) correctAnswers += 1;
       showFeedback(isCorrect);
       setTimeout(() => {
         isLocked = false;
@@ -212,7 +261,7 @@ function tryMoveNoButton(noBtn) {
 
 function renderFinalStep() {
   setProgress(TOTAL_STEPS);
-  cardTitle.textContent = "Will you be my Valentine (please)?";
+  setDynamicFinalTitle();
   cardSubtitle.textContent = "";
   setStepImage(
     FINAL_PROMPT_IMAGE.src,
@@ -234,6 +283,9 @@ function renderFinalStep() {
   yesBtn.style.top = "0px";
   yesBtn.setAttribute("aria-label", "Yes");
   yesBtn.addEventListener("click", () => {
+    successText.textContent = DEFAULT_SUCCESS_TEXT;
+    setVisible(restartBtn, false);
+    setVisible(successHeart, true);
     setVisible(content, false);
     setVisible(progress, false);
     setVisible(success, true);
@@ -260,6 +312,27 @@ function renderFinalStep() {
   answers.appendChild(noBtn);
 }
 
+function renderRetryStep() {
+  setProgress(TOTAL_STEPS);
+  setPlainCardTitle(RETRY_TEXT);
+  cardSubtitle.textContent = "";
+  setStepImage();
+  questionText.textContent = "";
+  clearAnswers();
+  setVisible(startBtn, false);
+  setVisible(success, false);
+  setVisible(content, true);
+  feedback.textContent = "";
+
+  const retryBtn = document.createElement("button");
+  retryBtn.type = "button";
+  retryBtn.className = "nes-btn is-primary";
+  retryBtn.textContent = "Restart Quiz";
+  retryBtn.setAttribute("aria-label", "Restart quiz");
+  retryBtn.addEventListener("click", () => resetQuiz());
+  answers.appendChild(retryBtn);
+}
+
 function renderStep() {
   if (currentStep === 0) {
     renderTitleStep();
@@ -269,12 +342,35 @@ function renderStep() {
     renderQuestionStep(currentStep);
     return;
   }
+  const scoreRatio = correctAnswers / QUESTIONS.length;
+  if (scoreRatio < PASSING_SCORE_RATIO) {
+    renderRetryStep();
+    return;
+  }
   renderFinalStep();
 }
 
+function resetQuiz() {
+  currentStep = 0;
+  isLocked = false;
+  correctAnswers = 0;
+  noButtonReadyAt = 0;
+  clearTimeout(noButtonCooldownTimer);
+  lastNoPos = null;
+  remainingCorrectFeedbacks = [];
+  remainingWrongFeedbacks = [];
+  lastShownFeedback = "";
+  renderStep();
+}
+
 startBtn.addEventListener("click", () => {
+  correctAnswers = 0;
   currentStep = 1;
   renderStep();
+});
+
+restartBtn.addEventListener("click", () => {
+  resetQuiz();
 });
 
 renderStep();

@@ -36,12 +36,54 @@ body {
   text-align: center;
 }
 
+.final-dynamic-title {
+  line-height: 1.7;
+}
+
+.final-dynamic-title .title-word {
+  display: inline-block;
+  animation: titleFloat 1.8s ease-in-out infinite;
+}
+
+.final-dynamic-title .title-soft {
+  color: #dd6b86;
+  font-weight: 700;
+  animation-delay: 0.12s;
+}
+
+.final-dynamic-title .title-strong {
+  color: #c83f5f;
+  font-weight: 700;
+  animation: titlePulse 1.15s ease-in-out infinite;
+}
+
+.final-dynamic-title .title-heart {
+  color: #ef5a7a;
+  font-weight: 700;
+  animation: titleWiggle 0.9s ease-in-out infinite;
+}
+
+.intro-you {
+  color: #d54d79;
+  font-weight: 700;
+}
+
+.intro-us {
+  color: #b14567;
+  font-weight: 700;
+}
+
 .card-subtitle {
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.6;
   margin: 0 0 16px;
   text-align: center;
   color: #6a4b4b;
+}
+
+.subtitle-highlight {
+  color: #c83f5f;
+  font-weight: 700;
 }
 
 .question-text {
@@ -49,6 +91,11 @@ body {
   line-height: 1.6;
   margin: 10px 0 16px;
   text-align: center;
+}
+
+.prompt-highlight {
+  color: #ce4f70;
+  font-weight: 700;
 }
 
 .step-image {
@@ -99,6 +146,12 @@ body {
   width: 100%;
   padding: 12px 14px;
   font-size: 10px;
+  transition: background-color 0.18s ease;
+}
+
+.answers:not(.final) .nes-btn:hover,
+.answers:not(.final) .nes-btn:focus-visible {
+  background-color: #f9dbe5;
 }
 
 .answers.final {
@@ -136,6 +189,77 @@ body {
   font-size: 10px;
 }
 
+#start-btn.nes-btn.is-primary,
+.answers.final .nes-btn.is-primary {
+  background-color: #e85b79;
+  color: #fff;
+  border-color: #d94c6a;
+  box-shadow: inset -4px -4px #c33f5c;
+}
+
+#start-btn.nes-btn.is-primary::after,
+.answers.final .nes-btn.is-primary::after {
+  box-shadow: inset -4px -4px #c33f5c;
+}
+
+#start-btn.nes-btn.is-primary:hover,
+#start-btn.nes-btn.is-primary:focus-visible,
+.answers.final .nes-btn.is-primary:hover,
+.answers.final .nes-btn.is-primary:focus-visible {
+  background-color: #ef6f8c;
+}
+
+#start-btn.nes-btn.is-primary:hover::after,
+#start-btn.nes-btn.is-primary:focus-visible::after,
+.answers.final .nes-btn.is-primary:hover::after,
+.answers.final .nes-btn.is-primary:focus-visible::after {
+  box-shadow: inset -6px -6px #c33f5c;
+}
+
+#start-btn.nes-btn.is-primary:active,
+.answers.final .nes-btn.is-primary:active {
+  box-shadow: inset 4px 4px #c33f5c;
+}
+
+#start-btn.nes-btn.is-primary:active::after,
+.answers.final .nes-btn.is-primary:active::after {
+  box-shadow: inset 4px 4px #c33f5c;
+}
+
+.answers.final .nes-btn.is-error {
+  background-color: #f6d0da;
+  color: #7a3446;
+  border-color: #e5a8b8;
+  box-shadow: inset -4px -4px #d58ea2;
+}
+
+.answers.final .nes-btn.is-error::after {
+  box-shadow: inset -4px -4px #d58ea2;
+}
+
+.answers.final .nes-btn.is-error:hover,
+.answers.final .nes-btn.is-error:focus-visible {
+  background-color: #f2bccb;
+}
+
+.answers.final .nes-btn.is-error:hover::after,
+.answers.final .nes-btn.is-error:focus-visible::after {
+  box-shadow: inset -6px -6px #d58ea2;
+}
+
+.answers.final .nes-btn.is-error:active {
+  box-shadow: inset 4px 4px #d58ea2;
+}
+
+.answers.final .nes-btn.is-error:active::after {
+  box-shadow: inset 4px 4px #d58ea2;
+}
+
+.answers.final .nes-btn.is-error:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
 .feedback {
   min-height: 18px;
   margin-top: 10px;
@@ -151,6 +275,11 @@ body {
 .success {
   text-align: center;
   padding: 10px 0 6px;
+}
+
+#restart-btn {
+  width: 100%;
+  margin-top: 14px;
 }
 
 .pixel-heart {
@@ -190,6 +319,48 @@ body {
   }
   100% {
     transform: scale(1.4);
+  }
+}
+
+@keyframes titleFloat {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes titlePulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes titleWiggle {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(8deg);
+  }
+  100% {
+    transform: rotate(0deg);
   }
 }
 
